@@ -5,7 +5,7 @@ This repository hosts the unified documentation site for all ColabBoard microser
 ## Quick Start
 
 ```bash
-git clone https://github.com/tomasparramonroy/ColabBoard_Docs.git
+git clone https://github.com/ColabBoard/ColabBoard_Docs.git
 cd ColabBoard_Docs
 npm install
 npm start          # Local dev server at http://localhost:3000
@@ -19,7 +19,7 @@ npm start          # Local dev server at http://localhost:3000
 4. Run `npm run build` to check for broken links.
 5. Submit a Pull Request to `main`.
 
-Full details: [Contributing Guide](https://tomasparramonroy.github.io/ColabBoard_Docs/docs/contributing)
+Full details: [Contributing Guide](https://ColabBoard.github.io/ColabBoard_Docs/docs/contributing)
 
 ## Docs Site Structure
 

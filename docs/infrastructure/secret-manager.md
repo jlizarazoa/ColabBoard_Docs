@@ -12,16 +12,13 @@ All ColabBoard services store sensitive configuration in **GCP Secret Manager**.
 
 | Secret Name | Service | Description |
 |---|---|---|
-| `colabboard-jwt-secret` | SSE Service, Session Service | HMAC-SHA256 JWT signing secret (min 32 chars) |
+| `colabboard-jwt-secret` | SSE Service | HMAC-SHA256 JWT signing secret (min 32 chars) |
 
-## Create Secrets
+## Create Secret
 
 ```bash
-# Generate a strong random secret
-$secret = [System.Web.Security.Membership]::GeneratePassword(48, 8)
-
 # Create in Secret Manager
-echo -n $secret | gcloud secrets create colabboard-jwt-secret \
+echo -n "<your-secret-value>" | gcloud secrets create colabboard-jwt-secret \
   --data-file=- \
   --project=<PROJECT_ID>
 ```

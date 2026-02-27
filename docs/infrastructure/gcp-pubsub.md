@@ -6,7 +6,7 @@ sidebar_label: GCP Pub/Sub
 
 # GCP Pub/Sub Setup
 
-GCP Pub/Sub is the production message broker between the Session Service and the SSE Service.
+GCP Pub/Sub is the production message broker used by the SSE Service to receive workspace events.
 
 ## Topic & Subscription
 
@@ -35,11 +35,6 @@ gcloud pubsub subscriptions create colabboard-sse-sub \
 gcloud pubsub subscriptions add-iam-policy-binding colabboard-sse-sub \
   --member="serviceAccount:<SSE_SERVICE_SA>@<PROJECT_ID>.iam.gserviceaccount.com" \
   --role="roles/pubsub.subscriber"
-
-# Grant the Session Service Cloud Run SA the publisher role
-gcloud pubsub topics add-iam-policy-binding workspace-events \
-  --member="serviceAccount:<SESSION_SERVICE_SA>@<PROJECT_ID>.iam.gserviceaccount.com" \
-  --role="roles/pubsub.publisher"
 ```
 
 ## Message Schema

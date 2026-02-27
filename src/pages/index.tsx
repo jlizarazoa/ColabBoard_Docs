@@ -26,24 +26,21 @@ const serviceCards: ServiceCard[] = [
   {
     emoji: '🔐',
     title: 'Session Service',
-    description:
-      'Manages user sessions and workspace membership. Issues JWTs and publishes access-revocation events to Pub/Sub.',
+    description: 'Coming soon — documentation will be added in a future iteration.',
     link: '/docs/session-service/overview',
     status: 'coming-soon',
   },
   {
     emoji: '🗄️',
     title: 'Session Database',
-    description:
-      'Persistent storage layer for session and workspace data. Schema, migrations, and query patterns.',
+    description: 'Coming soon — documentation will be added in a future iteration.',
     link: '/docs/session-db/overview',
     status: 'coming-soon',
   },
   {
     emoji: '🖥️',
     title: 'Web App',
-    description:
-      'Browser client that renders the collaborative workspace UI and consumes the SSE stream via the EventSource API.',
+    description: 'Coming soon — documentation will be added in a future iteration.',
     link: '/docs/web-app/overview',
     status: 'coming-soon',
   },

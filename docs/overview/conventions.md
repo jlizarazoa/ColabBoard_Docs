@@ -6,11 +6,11 @@ sidebar_label: Shared Conventions
 
 # Shared Conventions
 
-All ColabBoard microservices follow these conventions to ensure consistency.
+Conventions used by the SSE Service. Other services will document their conventions in future iterations.
 
 ## JWT Authentication
 
-All services that require authentication use **HMAC-SHA256 signed JWTs** (HS256). The signing secret is stored in **GCP Secret Manager** and injected as the `JWT_SECRET` environment variable.
+The SSE Service uses **HMAC-SHA256 signed JWTs** (HS256) for authentication. The signing secret is injected as the `JWT_SECRET` environment variable.
 
 ### Token Claims
 
@@ -71,10 +71,10 @@ public record ErrorResponse(string Code, string Message, DateTime Timestamp)
 
 ### Shared Variables
 
-| Variable | Services | Description |
-|---|---|---|
-| `JWT_SECRET` | SSE Service, Session Service | HMAC-SHA256 signing secret (min 32 chars) |
-| `JWT_ISSUER` | SSE Service | Expected token issuer; blank = skip validation |
+| Variable | Description |
+|---|---|
+| `JWT_SECRET` | HMAC-SHA256 signing secret (min 32 chars) |
+| `JWT_ISSUER` | Expected token issuer; blank = skip validation |
 
 ---
 
@@ -103,18 +103,7 @@ public record WorkspaceEvent(
 
 ### Registered Event Types
 
-| Event Type | Publisher | Consumer | Effect |
-|---|---|---|---|
-| `USER_REMOVED_FROM_WORKSPACE_EVENT` | Session Service | SSE Service | Terminates all SSE connections for that `userId + workspaceId` pair |
+| Event Type | Consumer | Effect |
+|---|---|---|
+| `USER_REMOVED_FROM_WORKSPACE_EVENT` | SSE Service | Terminates all SSE connections for that `userId + workspaceId` pair |
 
----
-
-## Logging
-
-All services use structured logging via the .NET `ILogger` abstraction with **Serilog** (or the built-in Microsoft logger in simple services). Log property names use `PascalCase` to match the structured log format expected by Cloud Logging.
-
-Example:
-
-```
-Connection registered. connectionId=abc123 userId=user-1 workspaceId=ws-1 total=5
-```

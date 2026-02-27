@@ -13,15 +13,14 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://tomasparramonroy.github.io',
+  url: 'https://ColabBoard.github.io',
   baseUrl: '/ColabBoard_Docs/',
-  organizationName: 'tomasparramonroy',
+  organizationName: 'ColabBoard',
   projectName: 'ColabBoard_Docs',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
 
   i18n: {
     defaultLocale: 'en',
@@ -30,6 +29,9 @@ const config: Config = {
 
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
   },
 
   themes: [
@@ -52,7 +54,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/tomasparramonroy/ColabBoard_Docs/tree/main/',
+            'https://github.com/ColabBoard/ColabBoard_Docs/tree/main/',
           showLastUpdateTime: true,
         },
         blog: false,
@@ -84,7 +86,7 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          href: 'https://github.com/tomasparramonroy/ColabBoard_Docs',
+          href: 'https://github.com/ColabBoard/ColabBoard_Docs',
           label: 'GitHub',
           position: 'right',
         },
@@ -105,7 +107,7 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            { label: 'GitHub', href: 'https://github.com/tomasparramonroy' },
+            { label: 'GitHub', href: 'https://github.com/ColabBoard' },
             { label: 'Contributing', to: '/docs/contributing' },
           ],
         },
