@@ -1,0 +1,128 @@
+import type { ReactNode } from 'react';
+import clsx from 'clsx';
+import Link from '@docusaurus/Link';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import Layout from '@theme/Layout';
+import Heading from '@theme/Heading';
+import styles from './index.module.css';
+
+type ServiceCard = {
+  emoji: string;
+  title: string;
+  description: string;
+  link: string;
+  status: 'stable' | 'coming-soon';
+};
+
+const serviceCards: ServiceCard[] = [
+  {
+    emoji: '📡',
+    title: 'SSE Service',
+    description:
+      'Real-time Server-Sent Events microservice. Delivers workspace events to browser clients over persistent HTTP connections.',
+    link: '/docs/sse-service/overview',
+    status: 'stable',
+  },
+  {
+    emoji: '🔐',
+    title: 'Session Service',
+    description:
+      'Manages user sessions and workspace membership. Issues JWTs and publishes access-revocation events to Pub/Sub.',
+    link: '/docs/session-service/overview',
+    status: 'coming-soon',
+  },
+  {
+    emoji: '🗄️',
+    title: 'Session Database',
+    description:
+      'Persistent storage layer for session and workspace data. Schema, migrations, and query patterns.',
+    link: '/docs/session-db/overview',
+    status: 'coming-soon',
+  },
+  {
+    emoji: '🖥️',
+    title: 'Web App',
+    description:
+      'Browser client that renders the collaborative workspace UI and consumes the SSE stream via the EventSource API.',
+    link: '/docs/web-app/overview',
+    status: 'coming-soon',
+  },
+  {
+    emoji: '☁️',
+    title: 'Infrastructure',
+    description:
+      'GCP Pub/Sub, Cloud Run, Load Balancer, and Secret Manager setup for the entire ColabBoard platform.',
+    link: '/docs/infrastructure/gcp-pubsub',
+    status: 'stable',
+  },
+  {
+    emoji: '📖',
+    title: 'Architecture',
+    description:
+      'System architecture overview, data flow diagrams, service dependency map, and shared conventions.',
+    link: '/docs/overview/architecture',
+    status: 'stable',
+  },
+];
+
+function ServiceCardItem({ card }: { card: ServiceCard }): ReactNode {
+  return (
+    <div className={clsx('col col--4', styles.cardCol)}>
+      <div className={styles.card}>
+        <div className={styles.cardEmoji}>{card.emoji}</div>
+        <Heading as="h3" className={styles.cardTitle}>
+          {card.title}
+          {card.status === 'coming-soon' && (
+            <span className={styles.badge}>coming soon</span>
+          )}
+        </Heading>
+        <p className={styles.cardDescription}>{card.description}</p>
+        <Link className="button button--outline button--primary button--sm" to={card.link}>
+          View docs →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function Home(): ReactNode {
+  const { siteConfig } = useDocusaurusContext();
+  return (
+    <Layout
+      title={siteConfig.title}
+      description="Unified documentation for all ColabBoard microservices">
+      <header className={clsx('hero hero--primary', styles.heroBanner)}>
+        <div className="container">
+          <Heading as="h1" className="hero__title">
+            ColabBoard Docs
+          </Heading>
+          <p className="hero__subtitle">{siteConfig.tagline}</p>
+          <div className={styles.buttons}>
+            <Link
+              className="button button--secondary button--lg"
+              to="/docs/overview/architecture">
+              Architecture Overview
+            </Link>
+            <Link
+              className="button button--outline button--secondary button--lg"
+              to="/docs/overview/getting-started"
+              style={{ marginLeft: '1rem' }}>
+              Getting Started
+            </Link>
+          </div>
+        </div>
+      </header>
+      <main>
+        <section className={styles.cardsSection}>
+          <div className="container">
+            <div className="row">
+              {serviceCards.map((card) => (
+                <ServiceCardItem key={card.title} card={card} />
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+    </Layout>
+  );
+}
