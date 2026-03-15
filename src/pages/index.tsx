@@ -40,9 +40,18 @@ const serviceCards: ServiceCard[] = [
   {
     emoji: '🖥️',
     title: 'Web App',
-    description: 'Coming soon — documentation will be added in a future iteration.',
+    description:
+      'React 19 SPA deployed on Cloudflare Pages. Kanban board, drag-and-drop, real-time SSE, profile setup, and workspace management.',
     link: '/docs/web-app/overview',
-    status: 'coming-soon',
+    status: 'stable',
+  },
+  {
+    emoji: '🔀',
+    title: 'API Gateway',
+    description:
+      'YARP reverse proxy (.NET 9) deployed on Cloud Run. Routes all browser traffic to downstream microservices with SSE passthrough.',
+    link: '/docs/api-gateway/overview',
+    status: 'stable',
   },
   {
     emoji: '☁️',
