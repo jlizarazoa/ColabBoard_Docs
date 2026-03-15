@@ -64,8 +64,26 @@ $env:RABBITMQ_CONNECTION_STRING = "amqp://guest:guest@localhost"
 dotnet test
 ```
 
+## Start the Web App locally
+
+```bash
+cd colabBoard_wa
+npm install
+
+# create a local env file
+echo "VITE_API_BASE_URL=https://colabboard-api-gateway-173469174364.southamerica-west1.run.app" > .env.local
+echo "VITE_USE_MOCKS=true" >> .env.local
+
+npm run dev
+# App available at http://localhost:5173
+```
+
+With `VITE_USE_MOCKS=true`, workspace and task endpoints are handled by **MSW** (Mock Service Worker) so no local backend is required. Auth, profile, and SSE always hit the real backend.
+
 ## Next Steps
 
 - Read the [SSE Service overview](../sse-service/overview) to understand the service architecture.
+- Read the [Web App overview](../web-app/overview) to understand the frontend.
+- Read the [API Gateway overview](../api-gateway/overview) for the proxy routing table.
 - Review the [Configuration Reference](../sse-service/configuration) for all environment variables.
 - See the [Deployment guide](../sse-service/deployment) for Docker and GCP Cloud Run instructions.

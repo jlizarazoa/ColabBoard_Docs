@@ -14,6 +14,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: '🖥️ Web App',
+      collapsed: false,
+      items: ['web-app/overview'],
+    },
+    {
+      type: 'category',
+      label: '🔀 API Gateway',
+      collapsed: false,
+      items: ['api-gateway/overview'],
+    },
+    {
+      type: 'category',
       label: '📡 SSE Service',
       collapsed: false,
       items: [
@@ -40,15 +52,10 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '🖥️ Web App',
-      collapsed: true,
-      items: ['web-app/overview'],
-    },
-    {
-      type: 'category',
       label: '☁️ Infrastructure',
       collapsed: true,
       items: [
+        'infrastructure/pubsub-standard',
         'infrastructure/gcp-pubsub',
         'infrastructure/cloud-run',
         'infrastructure/load-balancer',
