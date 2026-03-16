@@ -1,23 +1,23 @@
 ---
 id: deployment
-title: Docker & Deployment
-sidebar_label: Docker & Deployment
+title: Docker & Despliegue
+sidebar_label: Docker & Despliegue
 ---
 
-# Docker & Deployment
+# Docker & Despliegue
 
 ## Docker
 
-### Multi-Stage Dockerfile
+### Dockerfile Multi-Etapa
 
-The service uses a two-stage Dockerfile for minimal image size:
+El servicio usa un Dockerfile de dos etapas para minimizar el tamaño de la imagen:
 
-| Stage | Base Image | Purpose |
+| Etapa | Imagen base | Propósito |
 |---|---|---|
-| `build` | `mcr.microsoft.com/dotnet/sdk:9.0` | Restore, compile, publish |
-| `runtime` | `mcr.microsoft.com/dotnet/aspnet:9.0-alpine` | Run the published output |
+| `build` | `mcr.microsoft.com/dotnet/sdk:9.0` | Restaurar, compilar y publicar |
+| `runtime` | `mcr.microsoft.com/dotnet/aspnet:9.0-alpine` | Ejecutar el output publicado |
 
-The service runs as a **non-root user** (`appuser`) inside the container.
+El servicio se ejecuta como **usuario no root** (`appuser`) dentro del contenedor.
 
 ### Build
 
@@ -25,7 +25,7 @@ The service runs as a **non-root user** (`appuser`) inside the container.
 docker build -t colabboard-sse:latest .
 ```
 
-### Run (local)
+### Ejecutar (local)
 
 ```bash
 docker run --rm -p 8080:8080 \
@@ -33,13 +33,13 @@ docker run --rm -p 8080:8080 \
   colabboard-sse:latest
 ```
 
-### Run (with RabbitMQ)
+### Ejecutar (con RabbitMQ)
 
 ```bash
-# 1. Start RabbitMQ
+# 1. Iniciar RabbitMQ
 docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:3-management
 
-# 2. Start SSE Service connected to RabbitMQ
+# 2. Iniciar el SSE Service conectado a RabbitMQ
 docker run --rm -p 8080:8080 \
   -e JWT_SECRET="my-local-dev-secret-at-least-32-chars!" \
   -e MESSAGING_PROVIDER=RabbitMQ \
@@ -47,28 +47,28 @@ docker run --rm -p 8080:8080 \
   colabboard-sse:latest
 ```
 
-### Verify startup fails without JWT_SECRET
+### Verificar que falla sin JWT_SECRET
 
 ```bash
 docker run --rm colabboard-sse:latest
-# Expected: InvalidOperationException: Missing required configuration: 'JWT_SECRET'
+# Esperado: InvalidOperationException: Missing required configuration: 'JWT_SECRET'
 ```
 
 ---
 
-## GCP Deployment
+## Despliegue en GCP
 
-### Push to Container Registry
+### Subir al Container Registry
 
 ```bash
-# Tag for GCP Artifact Registry
+# Etiquetar para GCP Artifact Registry
 docker tag colabboard-sse:latest gcr.io/<PROJECT_ID>/colabboard-sse:latest
 
 # Push
 docker push gcr.io/<PROJECT_ID>/colabboard-sse:latest
 ```
 
-### Deploy to Cloud Run
+### Desplegar en Cloud Run
 
 ```bash
 gcloud run deploy colabboard-sse \
@@ -81,8 +81,8 @@ gcloud run deploy colabboard-sse \
   --set-env-vars JWT_SECRET=<secret>,MESSAGING_PROVIDER=PubSub,PUBSUB_PROJECT_ID=<project>,PUBSUB_SUBSCRIPTION_ID=<sub>
 ```
 
-:::tip Use Secret Manager for JWT_SECRET
-In production, mount `JWT_SECRET` from **GCP Secret Manager** rather than passing it directly as an env var:
+:::tip Usa Secret Manager para JWT_SECRET
+En producción, monta `JWT_SECRET` desde **GCP Secret Manager** en lugar de pasarlo directamente como variable de entorno:
 ```bash
 --set-secrets JWT_SECRET=colabboard-jwt-secret:latest
 ```
@@ -90,50 +90,50 @@ In production, mount `JWT_SECRET` from **GCP Secret Manager** rather than passin
 
 ---
 
-## GCP Load Balancer Configuration
+## Configuración del GCP Load Balancer
 
-The GCP Load Balancer must be configured with extended timeouts to support long-lived SSE connections:
+El GCP Load Balancer debe configurarse con timeouts extendidos para soportar conexiones SSE de larga duración:
 
-| Setting | Recommended Value | Reason |
+| Configuración | Valor recomendado | Motivo |
 |---|---|---|
-| **Backend Service Timeout** | `3600s` | Keeps SSE connections alive up to 1 hour |
-| **Connection Draining Timeout** | `300s` | Allows in-flight connections to drain during deploys |
-| **Cloud Run Request Timeout** | `3600s` | Must match backend timeout |
-| **CPU Allocation** | Always (`--no-cpu-throttling`) | Prevents CPU suspension on idle SSE connections |
-| **Min Instances** | `1` | Eliminates cold-start latency for persistent connections |
-| **Session Affinity** | `NONE` | Connections are stateless per-instance; load balance freely |
+| **Timeout del Backend Service** | `3600s` | Mantiene las conexiones SSE activas hasta 1 hora |
+| **Timeout de Connection Draining** | `300s` | Permite que las conexiones en curso se drenen durante los despliegues |
+| **Timeout de Request en Cloud Run** | `3600s` | Debe coincidir con el timeout del backend |
+| **Asignación de CPU** | Siempre (`--no-cpu-throttling`) | Evita la suspensión de CPU en conexiones SSE inactivas |
+| **Min Instances** | `1` | Elimina la latencia de cold-start para conexiones persistentes |
+| **Session Affinity** | `NONE` | Las conexiones son stateless por instancia; el balanceo es libre |
 
 ---
 
-## Graceful Shutdown
+## Apagado Graceful
 
-When the container receives `SIGTERM` (e.g., `docker stop` or Cloud Run scale-down):
+Cuando el contenedor recibe `SIGTERM` (p. ej. `docker stop` o scale-down de Cloud Run):
 
 ```mermaid
 sequenceDiagram
     participant Docker/CR as Docker / Cloud Run
     participant Host as .NET Host
     participant CM as ConnectionManager
-    participant Client as Browser Client
+    participant Client as Cliente Navegador
 
     Docker/CR->>Host: SIGTERM
     Host->>CM: ApplicationStopping → TerminateAll("server_shutdown")
     CM->>Client: event: connection-terminated\ndata: {"reason":"server_shutdown"}
     Note over Host: Thread.Sleep(500ms)
-    Host->>Host: Process exits
-    Client->>Client: EventSource auto-reconnects after retry: 5000ms
+    Host->>Host: Proceso termina
+    Client->>Client: EventSource se reconecta automáticamente tras retry: 5000ms
 ```
 
-1. `ApplicationStopping` fires → `ConnectionManager.TerminateAll("server_shutdown")`
-2. All connected clients receive `event: connection-terminated` with `reason: "server_shutdown"`.
-3. A 500ms sleep gives the request threads time to flush the termination event before the process exits.
-4. Browser `EventSource` automatically reconnects after 5 seconds.
+1. Se dispara `ApplicationStopping` → `ConnectionManager.TerminateAll("server_shutdown")`
+2. Todos los clientes conectados reciben `event: connection-terminated` con `reason: "server_shutdown"`.
+3. Una espera de 500ms da tiempo a los hilos de request para enviar el evento de terminación antes de que el proceso finalice.
+4. El `EventSource` del navegador se reconecta automáticamente tras 5 segundos.
 
 ---
 
-## Load Testing
+## Pruebas de Carga
 
 ```bash
-# Install k6: https://k6.io/docs/get-started/installation/
+# Instalar k6: https://k6.io/docs/get-started/installation/
 k6 run --vus 1000 --duration 60s k6-load-test.js
 ```

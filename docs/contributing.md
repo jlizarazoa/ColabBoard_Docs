@@ -1,35 +1,35 @@
 ---
 id: contributing
-title: Contributing to the Docs
-sidebar_label: Contributing
+title: Contribuir a la Documentación
+sidebar_label: Contribuir
 ---
 
-# Contributing to ColabBoard Docs
+# Contribuir a ColabBoard Docs
 
-This documentation site is the single source of truth for the entire ColabBoard platform. Each service team is responsible for their own section.
+Este sitio de documentación es la fuente de verdad para toda la plataforma ColabBoard. Cada equipo de servicio es responsable de su propia sección.
 
-## How to Add Documentation for Your Service
+## Cómo Añadir Documentación para Tu Servicio
 
-1. **Create a folder** under `docs/` for your service:
+1. **Crea una carpeta** en `docs/` para tu servicio:
    ```
    docs/
    ├── overview/
    ├── sse-service/
-   ├── session-service/     ← add your files here
+   ├── session-service/     ← añade tus archivos aquí
    ├── session-db/
    ├── web-app/
    └── infrastructure/
    ```
 
-2. **Create Markdown or MDX files** in your folder:
+2. **Crea archivos Markdown o MDX** en tu carpeta:
    ```bash
-   # Example
+   # Ejemplo
    docs/session-service/overview.md
    docs/session-service/api-reference.md
    docs/session-service/authentication.md
    ```
 
-   Every file needs front matter:
+   Cada archivo necesita front matter:
    ```markdown
    ---
    id: overview
@@ -38,7 +38,7 @@ This documentation site is the single source of truth for the entire ColabBoard 
    ---
    ```
 
-3. **Update `sidebars.ts`** — add your pages to the appropriate category:
+3. **Actualiza `sidebars.ts`** — añade tus páginas a la categoría correspondiente:
    ```typescript
    {
      type: 'category',
@@ -52,40 +52,40 @@ This documentation site is the single source of truth for the entire ColabBoard 
    },
    ```
 
-4. **Preview locally:**
+4. **Vista previa local:**
    ```bash
    cd ColabBoard_Docs
    npm start
-   # Opens http://localhost:3000
+   # Abre http://localhost:3000
    ```
 
-5. **Verify the build:**
+5. **Verificar la build:**
    ```bash
    npm run build
-   # Docusaurus checks for broken links automatically
+   # Docusaurus comprueba automáticamente los enlaces rotos
    ```
 
-6. **Submit a Pull Request** to `main`. The GitHub Actions workflow will automatically deploy to GitHub Pages when the PR is merged.
+6. **Envía un Pull Request** a `main`. El workflow de GitHub Actions desplegará automáticamente a GitHub Pages cuando el PR sea mergeado.
 
 ---
 
-## Markdown / MDX Conventions
+## Convenciones de Markdown / MDX
 
 ### Front Matter
 
-Every `.md` file must have front matter:
+Cada archivo `.md` debe tener front matter:
 
 ```markdown
 ---
-id: unique-id-within-the-folder
-title: Full Page Title
-sidebar_label: Short Label (shown in sidebar)
+id: id-único-dentro-de-la-carpeta
+title: Título Completo de la Página
+sidebar_label: Etiqueta Corta (mostrada en el sidebar)
 ---
 ```
 
-### Code Blocks
+### Bloques de Código
 
-Use fenced code blocks with a language identifier for syntax highlighting:
+Usa bloques de código delimitados con un identificador de lenguaje para el resaltado de sintaxis:
 
 ````markdown
 ```csharp
@@ -93,56 +93,56 @@ public record WorkspaceEvent(string EventType, string UserId, string WorkspaceId
 ```
 ````
 
-Supported languages include: `csharp`, `bash`, `json`, `docker`, `typescript`, `powershell`, `yaml`.
+Lenguajes soportados: `csharp`, `bash`, `json`, `docker`, `typescript`, `powershell`, `yaml`.
 
 ### Admonitions
 
-Use Docusaurus admonitions for notes, warnings, and cautions:
+Usa los admonitions de Docusaurus para notas, advertencias y avisos:
 
 ```markdown
 :::note
-This is a note.
+Esto es una nota.
 :::
 
 :::warning
-This is a warning.
+Esto es una advertencia.
 :::
 
 :::tip
-This is a tip.
+Esto es un consejo.
 :::
 
 :::danger
-This is a danger notice.
+Esto es un aviso de peligro.
 :::
 ```
 
 ---
 
-## Mermaid Diagrams
+## Diagramas Mermaid
 
-Use Mermaid for architecture diagrams — they are version-controlled as code and rendered automatically.
+Usa Mermaid para los diagramas de arquitectura — se versionan como código y se renderizan automáticamente.
 
 ````markdown
 ```mermaid
 flowchart LR
-    A["Service A"] -->|HTTP| B["Service B"]
+    A["Servicio A"] -->|HTTP| B["Servicio B"]
     B -->|Pub/Sub| C["GCP Pub/Sub"]
 ```
 ````
 
-Supported diagram types: `flowchart`, `sequenceDiagram`, `graph`, `classDiagram`, `erDiagram`.
+Tipos de diagrama soportados: `flowchart`, `sequenceDiagram`, `graph`, `classDiagram`, `erDiagram`.
 
 ---
 
-## File Naming
+## Nomenclatura de Archivos
 
-- Use `kebab-case` for file names: `api-reference.md`, `getting-started.md`
-- Match the `id` front matter to the file name (without extension)
-- Keep the `docs/` path short and descriptive
+- Usa `kebab-case` para los nombres de archivo: `api-reference.md`, `getting-started.md`
+- El campo `id` del front matter debe coincidir con el nombre del archivo (sin extensión)
+- Mantén la ruta en `docs/` corta y descriptiva
 
 ---
 
-## Questions?
+## ¿Preguntas?
 
-Open an issue in this repository or reach out to the ColabBoard platform team.
+Abre un issue en este repositorio o contacta al equipo de plataforma de ColabBoard.

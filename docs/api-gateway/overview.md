@@ -1,75 +1,75 @@
 ---
 id: overview
 title: API Gateway
-sidebar_label: Overview
+sidebar_label: Visión General
 ---
 
 # API Gateway
 
-The `ColabBoard_Api_Gateway` is a **.NET 9 YARP reverse proxy** deployed on **GCP Cloud Run**. All browser API traffic flows through it — it routes requests to the appropriate downstream microservice, handles CORS, and passes through SSE connections with buffering disabled.
+El `ColabBoard_Api_Gateway` es un **reverse proxy YARP en .NET 9** desplegado en **GCP Cloud Run**. Todo el tráfico de la API del navegador pasa a través de él — enruta los requests al microservicio correspondiente, gestiona CORS y pasa las conexiones SSE con el buffering desactivado.
 
-## Technology Stack
+## Stack Tecnológico
 
-| Component | Technology |
+| Componente | Tecnología |
 |---|---|
 | Runtime | .NET 9, ASP.NET Core |
-| Proxy engine | YARP (Yet Another Reverse Proxy) 2.3 |
+| Motor de proxy | YARP (Yet Another Reverse Proxy) 2.3 |
 | Hosting | GCP Cloud Run (`southamerica-west1`) |
 
-## Cloud Run URL
+## URL en Cloud Run
 
 ```
 https://colabboard-api-gateway-173469174364.southamerica-west1.run.app
 ```
 
-This is the value set as `VITE_API_BASE_URL` in the frontend.
+Este es el valor configurado como `VITE_API_BASE_URL` en el frontend.
 
-## Route Table
+## Tabla de Rutas
 
-| Route Pattern | Downstream Cluster | Destination | Notes |
+| Patrón de Ruta | Cluster Downstream | Destino | Notas |
 |---|---|---|---|
-| `/auth/{**}` | `auth-cluster` | Sessions MS (Cloud Run, `us-central1`) | Login, register, verify |
-| `/stream` | `sse-cluster` | SSE Service (Cloud Run, `southamerica-west1`) | SSE passthrough (buffering disabled) |
-| `/api/profile/{**}` | `profile-cluster` | Profile MS (Cloud Run, `us-central1`) | Profile CRUD |
+| `/auth/{**}` | `auth-cluster` | Sessions MS (Cloud Run, `us-central1`) | Login, registro, verificación |
+| `/stream` | `sse-cluster` | SSE Service (Cloud Run, `southamerica-west1`) | SSE passthrough (buffering desactivado) |
+| `/api/profile/{**}` | `profile-cluster` | Profile MS (Cloud Run, `us-central1`) | CRUD de perfil |
 | `/workspaces/{**}` | `workspace-cluster` | workspace-ms (placeholder) | — |
 | `/tasks/{**}` | `tasks-cluster` | tasks-ms (placeholder) | — |
 
-All routes apply the `X-Forwarded` header transformation so downstream services can read the original client IP and protocol.
+Todas las rutas aplican la transformación de headers `X-Forwarded` para que los servicios downstream puedan leer la IP y el protocolo originales del cliente.
 
 ## CORS
 
-CORS is enabled globally:
+CORS está habilitado globalmente:
 
-- **Allowed origins**: all (configured as wildcard — to be restricted to the Cloudflare Pages domain once all services are stable)
-- **Allowed headers**: all
-- **Allowed methods**: all
-- **Credentials**: allowed
+- **Orígenes permitidos**: todos (configurado como wildcard — a restringir al dominio de Cloudflare Pages una vez que todos los servicios estén estables)
+- **Headers permitidos**: todos
+- **Métodos permitidos**: todos
+- **Credenciales**: permitidas
 
-## SSE Passthrough Middleware
+## Middleware de Passthrough SSE
 
-The `/stream` route requires special treatment because YARP (and Kestrel) buffer responses by default, which breaks Server-Sent Events. A custom middleware intercepts requests to `/stream` and:
+La ruta `/stream` requiere un tratamiento especial porque YARP (y Kestrel) buferizan las respuestas por defecto, lo que rompe Server-Sent Events. Un middleware personalizado intercepta los requests a `/stream` y:
 
-1. Sets `IHttpResponseBodyFeature.DisableBuffering()` to disable Kestrel buffering.
-2. Adds the `X-Accel-Buffering: no` response header to disable Nginx-style proxy buffering upstream.
+1. Llama a `IHttpResponseBodyFeature.DisableBuffering()` para desactivar el buffering de Kestrel.
+2. Añade el header de respuesta `X-Accel-Buffering: no` para desactivar el buffering de proxies estilo Nginx.
 
-This ensures SSE data is flushed to the client immediately, not held in a buffer.
+Esto garantiza que los datos SSE se envíen al cliente inmediatamente, sin quedar en un buffer.
 
-## Forwarded Headers
+## Headers Reenviados
 
-`ForwardedHeadersMiddleware` is configured to forward:
+`ForwardedHeadersMiddleware` está configurado para reenviar:
 
-- `X-Forwarded-For` — original client IP address
-- `X-Forwarded-Proto` — original protocol (`https`)
+- `X-Forwarded-For` — IP original del cliente
+- `X-Forwarded-Proto` — protocolo original (`https`)
 
-Downstream services receive these headers and can use them for logging or IP-based logic.
+Los servicios downstream reciben estos headers y pueden usarlos para logging o lógica basada en IP.
 
-## Configuration
+## Configuración
 
-Routes and cluster destinations are defined in `appsettings.json` under the YARP `ReverseProxy` section. No secrets are required by the gateway itself — it only routes traffic.
+Las rutas y destinos de los clusters se definen en `appsettings.json` bajo la sección `ReverseProxy` de YARP. El gateway en sí no requiere secretos — solo enruta el tráfico.
 
-## Deployment
+## Despliegue
 
-The gateway is deployed to GCP Cloud Run. Because it only proxies HTTP requests, it does not need persistent connections or special CPU settings — standard Cloud Run defaults apply.
+El gateway se despliega en GCP Cloud Run. Como solo hace proxy de requests HTTP, no necesita conexiones persistentes ni configuración especial de CPU — se aplican los valores por defecto de Cloud Run.
 
 ```bash
 gcloud run deploy colabboard-api-gateway \

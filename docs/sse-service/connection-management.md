@@ -1,32 +1,32 @@
 ---
 id: connection-management
-title: Connection Management
-sidebar_label: Connection Management
+title: Gestión de Conexiones
+sidebar_label: Gestión de Conexiones
 ---
 
-# Connection Management
+# Gestión de Conexiones
 
-`ConnectionManager` is a thread-safe, in-memory registry of all active SSE connections. It is registered as a `Singleton` in DI.
+`ConnectionManager` es un registro en memoria, thread-safe, de todas las conexiones SSE activas. Se registra como `Singleton` en el contenedor de DI.
 
-**File:** `src/ColabBoard.SSE/Services/ConnectionManager.cs`
+**Archivo:** `src/ColabBoard.SSE/Services/ConnectionManager.cs`
 
-## Data Structures
+## Estructuras de Datos
 
-`ConnectionManager` uses a **dual-dictionary** design for O(1) lookup by either `connectionId` or `userId + workspaceId`:
+`ConnectionManager` usa un diseño de **doble diccionario** para obtener búsqueda O(1) tanto por `connectionId` como por `userId + workspaceId`:
 
 ```
 _connections  ConcurrentDictionary<string, SseConnection>
-              key: connectionId (UUID)
-              value: SseConnection object
+              clave: connectionId (UUID)
+              valor: objeto SseConnection
 
 _index        ConcurrentDictionary<string, ConcurrentDictionary<string, byte>>
-              key: "userId:workspaceId" composite key
-              value: set of connectionIds (byte sentinel for value)
+              clave: clave compuesta "userId:workspaceId"
+              valor: conjunto de connectionIds (byte centinela como valor)
 ```
 
-The secondary `_index` enables efficient lookup by user and workspace without iterating all connections—critical for the termination path triggered by `USER_REMOVED_FROM_WORKSPACE_EVENT`.
+El índice secundario `_index` permite búsquedas eficientes por usuario y workspace sin iterar todas las conexiones — crítico para la ruta de terminación disparada por `USER_REMOVED_FROM_WORKSPACE_EVENT`.
 
-## SseConnection Model
+## Modelo SseConnection
 
 ```csharp
 public sealed class SseConnection
@@ -37,20 +37,20 @@ public sealed class SseConnection
     public HttpResponse HttpResponse          { get; init; } = null!;
     public CancellationTokenSource CancellationTokenSource { get; init; } = null!;
     public DateTime ConnectedAt { get; init; } = DateTime.UtcNow;
-    public string? TerminationReason { get; set; }   // set before CTS.Cancel()
+    public string? TerminationReason { get; set; }   // se asigna antes de CTS.Cancel()
 }
 ```
 
-## Multi-Tab Support
+## Soporte Multi-Pestaña
 
-Because the secondary index maps `"userId:workspaceId"` to a **set** of `connectionId`s, a single user can have multiple concurrent SSE connections to the same workspace (e.g. multiple browser tabs). All of them are terminated together when `TerminateConnection` is called.
+Como el índice secundario mapea `"userId:workspaceId"` a un **conjunto** de `connectionId`s, un mismo usuario puede tener múltiples conexiones SSE concurrentes al mismo workspace (p. ej. varias pestañas del navegador). Todas ellas se terminan juntas cuando se llama a `TerminateConnection`.
 
 ```mermaid
 graph TD
-    User["user-123 in ws-1"]
-    ConnA["Tab A\nconnection-uuid-a"]
-    ConnB["Tab B\nconnection-uuid-b"]
-    ConnC["Tab C\nconnection-uuid-c"]
+    User["user-123 en ws-1"]
+    ConnA["Pestaña A\nconnection-uuid-a"]
+    ConnB["Pestaña B\nconnection-uuid-b"]
+    ConnC["Pestaña C\nconnection-uuid-c"]
 
     User --> ConnA
     User --> ConnB
@@ -69,43 +69,43 @@ graph TD
 
 ### `Register(SseConnection connection)`
 
-Adds a new connection to both the primary dictionary and the secondary index. Called by `StreamEndpoint` at the start of the SSE loop.
+Añade una nueva conexión tanto al diccionario principal como al índice secundario. Lo llama `StreamEndpoint` al inicio del bucle SSE.
 
 ### `Remove(string connectionId)`
 
-Removes a connection from both data structures and disposes its `CancellationTokenSource`. Called in the `finally` block of `StreamEndpoint` to guarantee cleanup on both normal and abnormal exit.
+Elimina una conexión de ambas estructuras de datos y libera su `CancellationTokenSource`. Se llama en el bloque `finally` de `StreamEndpoint` para garantizar la limpieza tanto en salida normal como en caso de excepción.
 
 ### `FindByUserAndWorkspace(string userId, string workspaceId)`
 
-Returns all active `SseConnection` objects for a `userId + workspaceId` combination. Returns an empty list if none exist.
+Devuelve todos los objetos `SseConnection` activos para una combinación `userId + workspaceId`. Devuelve una lista vacía si no existe ninguno.
 
 ### `TerminateConnection(string userId, string workspaceId, string reason)`
 
-1. Calls `FindByUserAndWorkspace` to get all matching connections.
-2. Sets `connection.TerminationReason = reason` on each.
-3. Calls `connection.CancellationTokenSource.Cancel()` on each.
+1. Llama a `FindByUserAndWorkspace` para obtener todas las conexiones coincidentes.
+2. Asigna `connection.TerminationReason = reason` en cada una.
+3. Llama a `connection.CancellationTokenSource.Cancel()` en cada una.
 
-The cancellation propagates to the heartbeat loop in `StreamEndpoint`, which catches `OperationCanceledException` and writes the `connection-terminated` SSE event before returning.
+La cancelación se propaga al bucle de heartbeat en `StreamEndpoint`, que captura la `OperationCanceledException` y escribe el evento SSE `connection-terminated` antes de retornar.
 
 ### `TerminateAll(string reason)`
 
-Cancels **all** active connections. Called during graceful shutdown via the `ApplicationStopping` lifetime hook:
+Cancela **todas** las conexiones activas. Se llama durante el apagado graceful mediante el hook de ciclo de vida `ApplicationStopping`:
 
 ```csharp
 app.Lifetime.ApplicationStopping.Register(() =>
 {
     connectionManager.TerminateAll("server_shutdown");
-    Thread.Sleep(500); // give request threads time to flush the termination event
+    Thread.Sleep(500); // dar tiempo a los hilos de request para enviar el evento de terminación
 });
 ```
 
 ### `ActiveConnectionCount`
 
-Returns the current number of active connections (`_connections.Count`). Used by the `/health` endpoint.
+Devuelve el número actual de conexiones activas (`_connections.Count`). Lo usa el endpoint `/health`.
 
 ## Thread Safety
 
-All operations are thread-safe:
-- `ConcurrentDictionary` provides lock-free reads and fine-grained locking for writes.
-- `TerminationReason` is set before `CTS.Cancel()` to avoid a race condition where the request thread reads the reason after cancellation.
-- The `finally` block in `StreamEndpoint` calls `Remove()` unconditionally, preventing leaked entries even on unexpected exceptions.
+Todas las operaciones son thread-safe:
+- `ConcurrentDictionary` proporciona lecturas sin bloqueo y bloqueo de grano fino para escrituras.
+- `TerminationReason` se asigna antes de `CTS.Cancel()` para evitar una condición de carrera donde el hilo del request lee el motivo después de la cancelación.
+- El bloque `finally` en `StreamEndpoint` llama a `Remove()` incondicionalmente, evitando entradas huérfanas incluso ante excepciones inesperadas.

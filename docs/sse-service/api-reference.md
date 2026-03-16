@@ -1,35 +1,35 @@
 ---
 id: api-reference
-title: API Reference
-sidebar_label: API Reference
+title: Referencia de API
+sidebar_label: Referencia de API
 ---
 
-# API Reference
+# Referencia de API
 
-The SSE Service exposes two HTTP endpoints.
+El SSE Service expone dos endpoints HTTP.
 
 ---
 
 ## `GET /stream`
 
-Opens a persistent **Server-Sent Events** stream for a specific user and workspace.
+Abre un stream persistente de **Server-Sent Events** para un usuario y workspace específicos.
 
-### Query Parameters
+### Parámetros de Query
 
-| Parameter | Type | Required | Description |
+| Parámetro | Tipo | Requerido | Descripción |
 |---|---|---|---|
-| `workspaceId` | `string` | **Yes** | The workspace ID to subscribe to |
-| `token` | `string` | **Yes** | A valid HS256-signed JWT |
+| `workspaceId` | `string` | **Sí** | ID del workspace al que suscribirse |
+| `token` | `string` | **Sí** | JWT válido firmado con HS256 |
 
-### Request Example
+### Ejemplo de Request
 
 ```bash
 curl -N "http://localhost:5263/stream?workspaceId=ws-1&token=<jwt>"
 ```
 
-### Response
+### Respuesta
 
-**Success — `200 OK`**
+**Éxito — `200 OK`**
 
 Headers:
 
@@ -41,7 +41,7 @@ X-Accel-Buffering: no
 X-Content-Type-Options: nosniff
 ```
 
-**Initial SSE preamble** (sent immediately on connection):
+**Preámbulo SSE inicial** (enviado inmediatamente al conectar):
 
 ```
 id: 1
@@ -52,16 +52,16 @@ data: {"status":"ok"}
 
 ```
 
-**Periodic heartbeat** (every `HEARTBEAT_INTERVAL_SECONDS`, default 15s):
+**Heartbeat periódico** (cada `HEARTBEAT_INTERVAL_SECONDS`, por defecto 15s):
 
 ```
 : heartbeat
 
 ```
 
-The heartbeat is an SSE comment line. Clients ignore it; it exists solely to prevent proxy/load-balancer timeout on idle connections.
+El heartbeat es una línea de comentario SSE. Los clientes la ignoran; existe únicamente para evitar timeouts del proxy o load balancer en conexiones inactivas.
 
-**Server-initiated termination event** (e.g. access revoked or server shutdown):
+**Evento de terminación iniciado por el servidor** (p. ej. acceso revocado o apagado del servidor):
 
 ```
 event: connection-terminated
@@ -69,30 +69,30 @@ data: {"reason":"access_revoked"}
 
 ```
 
-| `reason` value | Trigger |
+| Valor de `reason` | Disparador |
 |---|---|
-| `access_revoked` | `USER_REMOVED_FROM_WORKSPACE_EVENT` received from Pub/Sub |
-| `server_shutdown` | Container received `SIGTERM` (graceful shutdown) |
+| `access_revoked` | Se recibió `USER_REMOVED_FROM_WORKSPACE_EVENT` desde Pub/Sub |
+| `server_shutdown` | El contenedor recibió `SIGTERM` (apagado graceful) |
 
-After receiving `connection-terminated`, clients should stop reconnecting (the access has been revoked) or allow the browser `EventSource` to reconnect after the graceful shutdown grace period.
+Tras recibir `connection-terminated`, los clientes deben dejar de reconectarse (el acceso fue revocado) o permitir que el `EventSource` del navegador se reconecte pasado el periodo de gracia del apagado.
 
 ---
 
-**Error responses:**
+**Respuestas de error:**
 
-| Condition | Status | Body |
+| Condición | Status | Cuerpo |
 |---|---|---|
-| Missing `token` query parameter | `401` | `{"code":"MISSING_TOKEN","message":"A 'token' query parameter is required.","timestamp":"..."}` |
-| Invalid / expired token | `401` | `{"code":"UNAUTHORIZED","message":"Token is invalid or expired.","timestamp":"..."}` |
-| Missing `workspaceId` parameter | `400` | `{"code":"MISSING_WORKSPACE_ID","message":"The 'workspaceId' query parameter is required.","timestamp":"..."}` |
+| Parámetro `token` ausente | `401` | `{"code":"MISSING_TOKEN","message":"A 'token' query parameter is required.","timestamp":"..."}` |
+| Token inválido o expirado | `401` | `{"code":"UNAUTHORIZED","message":"Token is invalid or expired.","timestamp":"..."}` |
+| Parámetro `workspaceId` ausente | `400` | `{"code":"MISSING_WORKSPACE_ID","message":"The 'workspaceId' query parameter is required.","timestamp":"..."}` |
 
 ---
 
 ## `GET /health`
 
-Returns the current health status of the service. Suitable for load-balancer health checks.
+Devuelve el estado de salud actual del servicio. Apto para health checks del load balancer.
 
-### Response — `200 OK`
+### Respuesta — `200 OK`
 
 ```json
 {
@@ -102,13 +102,13 @@ Returns the current health status of the service. Suitable for load-balancer hea
 }
 ```
 
-| Field | Type | Description |
+| Campo | Tipo | Descripción |
 |---|---|---|
-| `status` | `string` | Always `"healthy"` when the service is running |
-| `activeConnections` | `int` | Number of currently open SSE connections |
-| `uptime` | `string` | Service uptime in `dd.hh:mm:ss` format |
+| `status` | `string` | Siempre `"healthy"` cuando el servicio está en ejecución |
+| `activeConnections` | `int` | Número de conexiones SSE activas actualmente |
+| `uptime` | `string` | Tiempo activo del servicio en formato `dd.hh:mm:ss` |
 
-### Request Example
+### Ejemplo de Request
 
 ```bash
 curl "http://localhost:5263/health"
@@ -116,36 +116,36 @@ curl "http://localhost:5263/health"
 
 ---
 
-## SSE Event Reference
+## Referencia de Eventos SSE
 
-| Event name | When sent | Data shape |
+| Nombre del evento | Cuándo se envía | Forma del dato |
 |---|---|---|
-| `connected` | Immediately on stream open | `{"status":"ok"}` |
-| *(heartbeat comment)* | Every `HEARTBEAT_INTERVAL_SECONDS` | `: heartbeat` (no event field) |
-| `connection-terminated` | Server-initiated close | `{"reason":"<reason>"}` |
+| `connected` | Inmediatamente al abrir el stream | `{"status":"ok"}` |
+| *(comentario de heartbeat)* | Cada `HEARTBEAT_INTERVAL_SECONDS` | `: heartbeat` (sin campo `event`) |
+| `connection-terminated` | Cierre iniciado por el servidor | `{"reason":"<reason>"}` |
 
-### Client-Side Example (JavaScript)
+### Ejemplo en el Cliente (JavaScript)
 
 ```javascript
-const token = await getJwt(); // obtain from your auth flow
+const token = await getJwt(); // obtener desde tu flujo de autenticación
 const es = new EventSource(
   `/stream?workspaceId=${workspaceId}&token=${token}`
 );
 
 es.addEventListener('connected', (e) => {
-  console.log('SSE stream opened', JSON.parse(e.data));
+  console.log('SSE stream abierto', JSON.parse(e.data));
 });
 
 es.addEventListener('connection-terminated', (e) => {
   const { reason } = JSON.parse(e.data);
-  console.warn('Connection terminated by server:', reason);
+  console.warn('Conexión terminada por el servidor:', reason);
   if (reason === 'access_revoked') {
-    es.close(); // Don't auto-reconnect when access has been revoked
+    es.close(); // No reconectar automáticamente cuando el acceso fue revocado
     redirectToLogin();
   }
 });
 
 es.onerror = (err) => {
-  console.error('SSE error, will auto-reconnect after retry interval', err);
+  console.error('Error SSE, se reconectará tras el intervalo de retry', err);
 };
 ```

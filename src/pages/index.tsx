@@ -11,7 +11,6 @@ type ServiceCard = {
   title: string;
   description: string;
   link: string;
-  status: 'stable' | 'coming-soon';
 };
 
 const serviceCards: ServiceCard[] = [
@@ -19,55 +18,50 @@ const serviceCards: ServiceCard[] = [
     emoji: '📡',
     title: 'SSE Service',
     description:
-      'Real-time Server-Sent Events microservice. Delivers workspace events to browser clients over persistent HTTP connections.',
+      'Microservicio de eventos en tiempo real (Server-Sent Events). Entrega eventos del workspace a los clientes del navegador mediante conexiones HTTP persistentes.',
     link: '/docs/sse-service/overview',
-    status: 'stable',
   },
   {
     emoji: '🔐',
     title: 'Session Service',
-    description: 'Coming soon — documentation will be added in a future iteration.',
+    description:
+      'Microservicio de autenticación basado en Spring Boot 3 y Firebase Admin SDK. Gestiona registro, login (email, SMS, OAuth), validación de tokens JWT y revocación de sesiones.',
     link: '/docs/session-service/overview',
-    status: 'coming-soon',
   },
   {
     emoji: '🗄️',
     title: 'Session Database',
-    description: 'Coming soon — documentation will be added in a future iteration.',
+    description:
+      'Firebase Authentication como base de datos de sesiones gestionada. Almacena credenciales, tokens JWT y metadatos de usuario con soporte multi-proveedor.',
     link: '/docs/session-db/overview',
-    status: 'coming-soon',
   },
   {
     emoji: '🖥️',
     title: 'Web App',
     description:
-      'React 19 SPA deployed on Cloudflare Pages. Kanban board, drag-and-drop, real-time SSE, profile setup, and workspace management.',
+      'SPA en React 19 desplegada en Cloudflare Pages. Incluye tablero Kanban, drag-and-drop, eventos en tiempo real por SSE, configuración de perfil y gestión de workspaces.',
     link: '/docs/web-app/overview',
-    status: 'stable',
   },
   {
     emoji: '🔀',
     title: 'API Gateway',
     description:
-      'YARP reverse proxy (.NET 9) deployed on Cloud Run. Routes all browser traffic to downstream microservices with SSE passthrough.',
+      'Reverse proxy YARP (.NET 9) desplegado en Cloud Run. Enruta el tráfico del navegador hacia los microservicios con soporte de passthrough para SSE.',
     link: '/docs/api-gateway/overview',
-    status: 'stable',
   },
   {
     emoji: '☁️',
-    title: 'Infrastructure',
+    title: 'Infraestructura',
     description:
-      'GCP Pub/Sub, Cloud Run, Load Balancer, and Secret Manager setup for the entire ColabBoard platform.',
+      'Configuración de GCP Pub/Sub, Cloud Run, Load Balancer y Secret Manager para toda la plataforma ColabBoard.',
     link: '/docs/infrastructure/gcp-pubsub',
-    status: 'stable',
   },
   {
     emoji: '📖',
-    title: 'Architecture',
+    title: 'Arquitectura',
     description:
-      'System architecture overview, data flow diagrams, service dependency map, and shared conventions.',
+      'Visión general del sistema, diagramas de flujo de datos, mapa de dependencias entre servicios y convenciones compartidas.',
     link: '/docs/overview/architecture',
-    status: 'stable',
   },
 ];
 
@@ -78,13 +72,10 @@ function ServiceCardItem({ card }: { card: ServiceCard }): ReactNode {
         <div className={styles.cardEmoji}>{card.emoji}</div>
         <Heading as="h3" className={styles.cardTitle}>
           {card.title}
-          {card.status === 'coming-soon' && (
-            <span className={styles.badge}>coming soon</span>
-          )}
         </Heading>
         <p className={styles.cardDescription}>{card.description}</p>
         <Link className="button button--outline button--primary button--sm" to={card.link}>
-          View docs →
+          Ver docs →
         </Link>
       </div>
     </div>
@@ -96,7 +87,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={siteConfig.title}
-      description="Unified documentation for all ColabBoard microservices">
+      description="Documentación unificada para todos los microservicios de ColabBoard">
       <header className={clsx('hero hero--primary', styles.heroBanner)}>
         <div className="container">
           <Heading as="h1" className="hero__title">
@@ -107,13 +98,13 @@ export default function Home(): ReactNode {
             <Link
               className="button button--secondary button--lg"
               to="/docs/overview/architecture">
-              Architecture Overview
+              Visión General de Arquitectura
             </Link>
             <Link
               className="button button--outline button--secondary button--lg"
               to="/docs/overview/getting-started"
               style={{ marginLeft: '1rem' }}>
-              Getting Started
+              Primeros Pasos
             </Link>
           </div>
         </div>

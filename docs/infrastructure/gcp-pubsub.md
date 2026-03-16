@@ -1,45 +1,45 @@
 ---
 id: gcp-pubsub
-title: GCP Pub/Sub Setup
+title: Configuración de GCP Pub/Sub
 sidebar_label: GCP Pub/Sub
 ---
 
-# GCP Pub/Sub Setup
+# Configuración de GCP Pub/Sub
 
-GCP Pub/Sub is the production message broker used by the SSE Service to receive workspace events.
+GCP Pub/Sub es el broker de mensajes en producción utilizado por el SSE Service para recibir eventos de workspace.
 
-## Topic & Subscription
+## Topic y Suscripción
 
-| Resource | Name | Description |
+| Recurso | Nombre | Descripción |
 |---|---|---|
-| Topic | `workspace-events` | Receives all workspace-related events |
-| Subscription | `colabboard-sse-sub` | Pull subscription consumed by the SSE Service |
+| Topic | `workspace-events` | Recibe todos los eventos relacionados con workspaces |
+| Suscripción | `colabboard-sse-sub` | Suscripción pull consumida por el SSE Service |
 
-## Setup Commands
+## Comandos de Configuración
 
 ```bash
-# Create the topic
+# Crear el topic
 gcloud pubsub topics create workspace-events --project=<PROJECT_ID>
 
-# Create the pull subscription for the SSE Service
+# Crear la suscripción pull para el SSE Service
 gcloud pubsub subscriptions create colabboard-sse-sub \
   --topic=workspace-events \
   --ack-deadline=30 \
   --project=<PROJECT_ID>
 ```
 
-## IAM Permissions
+## Permisos IAM
 
 ```bash
-# Grant the SSE Service Cloud Run SA the subscriber role
+# Otorgar al SA de Cloud Run del SSE Service el rol de suscriptor
 gcloud pubsub subscriptions add-iam-policy-binding colabboard-sse-sub \
   --member="serviceAccount:<SSE_SERVICE_SA>@<PROJECT_ID>.iam.gserviceaccount.com" \
   --role="roles/pubsub.subscriber"
 ```
 
-## Message Schema
+## Esquema del Mensaje
 
-All messages must be JSON with this shape:
+Todos los mensajes deben ser JSON con esta estructura:
 
 ```json
 {
@@ -50,7 +50,7 @@ All messages must be JSON with this shape:
 }
 ```
 
-## Publish a Test Event (local testing)
+## Publicar un Evento de Prueba (testing local)
 
 ```bash
 gcloud pubsub topics publish workspace-events \

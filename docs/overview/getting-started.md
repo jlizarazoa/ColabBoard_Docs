@@ -1,24 +1,24 @@
 ---
 id: getting-started
-title: Getting Started
-sidebar_label: Getting Started
+title: Primeros Pasos
+sidebar_label: Primeros Pasos
 ---
 
-# Getting Started
+# Primeros Pasos
 
-This guide walks a new developer through setting up a local ColabBoard development environment.
+Esta guía explica cómo configurar un entorno de desarrollo local de ColabBoard.
 
-## Prerequisites
+## Requisitos Previos
 
-| Tool | Version | Purpose |
+| Herramienta | Versión | Propósito |
 |---|---|---|
-| [.NET 9 SDK](https://dotnet.microsoft.com/download) | 9.0+ | Build and run the SSE Service |
-| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | 24+ | Containerised runs |
-| [Node.js](https://nodejs.org/) | 20+ | Web App frontend |
-| [gcloud CLI](https://cloud.google.com/sdk/docs/install) | Latest | GCP deployment |
-| [RabbitMQ](https://www.rabbitmq.com/) | 3.x | Local event broker (optional) |
+| [.NET 9 SDK](https://dotnet.microsoft.com/download) | 9.0+ | Compilar y ejecutar el SSE Service |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | 24+ | Ejecución en contenedores |
+| [Node.js](https://nodejs.org/) | 20+ | Frontend de la Web App |
+| [gcloud CLI](https://cloud.google.com/sdk/docs/install) | Latest | Despliegue en GCP |
+| [RabbitMQ](https://www.rabbitmq.com/) | 3.x | Broker de eventos local (opcional) |
 
-## Clone the Repositories
+## Clonar los Repositorios
 
 ```bash
 # SSE Service
@@ -26,64 +26,64 @@ git clone https://github.com/tomasparramonroy/colabBoard_SSE_service.git
 cd colabBoard_SSE_service
 ```
 
-## Start the SSE Service locally
+## Iniciar el SSE Service localmente
 
 ```bash
-# 1. Set the required JWT_SECRET environment variable (min 32 characters)
+# 1. Configurar la variable de entorno JWT_SECRET (mínimo 32 caracteres)
 $env:JWT_SECRET = "my-local-dev-secret-at-least-32-chars!"
 
-# 2. Run the service (listens on http://localhost:5263)
+# 2. Ejecutar el servicio (escucha en http://localhost:5263)
 dotnet run --project src/ColabBoard.SSE
 
-# 3. In another terminal, generate a test JWT
+# 3. En otra terminal, generar un JWT de prueba
 .\gen-token.ps1
 
-# 4. Open an SSE stream
-curl.exe -N "http://localhost:5263/stream?workspaceId=ws-1&token=<generated_token>"
+# 4. Abrir un stream SSE
+curl.exe -N "http://localhost:5263/stream?workspaceId=ws-1&token=<token_generado>"
 
-# 5. Check health
+# 5. Comprobar el estado de salud
 curl.exe "http://localhost:5263/health"
 ```
 
-## Start RabbitMQ (optional — for local event testing)
+## Iniciar RabbitMQ (opcional — para pruebas de eventos locales)
 
 ```bash
 docker run -d -p 5672:5672 -p 15672:15672 rabbitmq:3-management
 ```
 
-Then set these additional environment variables before starting the SSE Service:
+Luego configurar estas variables de entorno adicionales antes de iniciar el SSE Service:
 
 ```bash
 $env:MESSAGING_PROVIDER = "RabbitMQ"
 $env:RABBITMQ_CONNECTION_STRING = "amqp://guest:guest@localhost"
 ```
 
-## Run tests
+## Ejecutar los Tests
 
 ```bash
 dotnet test
 ```
 
-## Start the Web App locally
+## Iniciar la Web App localmente
 
 ```bash
 cd colabBoard_wa
 npm install
 
-# create a local env file
+# Crear un archivo de entorno local
 echo "VITE_API_BASE_URL=https://colabboard-api-gateway-173469174364.southamerica-west1.run.app" > .env.local
 echo "VITE_USE_MOCKS=true" >> .env.local
 
 npm run dev
-# App available at http://localhost:5173
+# App disponible en http://localhost:5173
 ```
 
-With `VITE_USE_MOCKS=true`, workspace and task endpoints are handled by **MSW** (Mock Service Worker) so no local backend is required. Auth, profile, and SSE always hit the real backend.
+Con `VITE_USE_MOCKS=true`, los endpoints de workspaces y tareas son gestionados por **MSW** (Mock Service Worker), por lo que no se necesita un backend local. Auth, perfil y SSE siempre conectan al backend real.
 
-## Next Steps
+## Próximos Pasos
 
-- Read the [SSE Service overview](../sse-service/overview) to understand the service architecture.
-- Read the [Web App overview](../web-app/overview) to understand the frontend.
-- Read the [API Gateway overview](../api-gateway/overview) for the proxy routing table.
-- Review the [Configuration Reference](../sse-service/configuration) for all environment variables.
-- See the [Deployment guide](../sse-service/deployment) for Docker and GCP Cloud Run instructions.
+- Lee la [descripción del SSE Service](../sse-service/overview) para entender la arquitectura del servicio.
+- Lee la [descripción de la Web App](../web-app/overview) para entender el frontend.
+- Lee la [descripción del API Gateway](../api-gateway/overview) para la tabla de rutas del proxy.
+- Revisa la [Referencia de Configuración](../sse-service/configuration) con todas las variables de entorno.
+- Consulta la [guía de Despliegue](../sse-service/deployment) para Docker y GCP Cloud Run.

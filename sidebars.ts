@@ -4,7 +4,7 @@ const sidebars: SidebarsConfig = {
   mainSidebar: [
     {
       type: 'category',
-      label: '📖 Overview',
+      label: '📖 Visión General',
       collapsed: false,
       items: [
         'overview/architecture',
@@ -42,7 +42,11 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: '🔐 Session Service',
       collapsed: true,
-      items: ['session-service/overview'],
+      items: [
+        'session-service/overview',
+        'session-service/api-reference',
+        'session-service/setup',
+      ],
     },
     {
       type: 'category',
@@ -52,7 +56,37 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: '☁️ Infrastructure',
+      label: '👤 Profile Service',
+      collapsed: true,
+      items: [
+        'profile-service/overview',
+        'profile-service/api-reference',
+        'profile-service/setup',
+      ],
+    },
+    {
+      type: 'category',
+      label: '📋 Task Service',
+      collapsed: true,
+      items: [
+        'task-service/overview',
+        'task-service/api-reference',
+        'task-service/setup',
+      ],
+    },
+    {
+      type: 'category',
+      label: '🏢 Workspace Service',
+      collapsed: true,
+      items: [
+        'workspace-service/overview',
+        'workspace-service/api-reference',
+        'workspace-service/setup',
+      ],
+    },
+    {
+      type: 'category',
+      label: '☁️ Infraestructura',
       collapsed: true,
       items: [
         'infrastructure/pubsub-standard',

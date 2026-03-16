@@ -1,49 +1,49 @@
 ---
 id: conventions
-title: Shared Conventions
-sidebar_label: Shared Conventions
+title: Convenciones Compartidas
+sidebar_label: Convenciones Compartidas
 ---
 
-# Shared Conventions
+# Convenciones Compartidas
 
-Conventions used by the SSE Service. Other services will document their conventions in future iterations.
+Convenciones utilizadas por el SSE Service. Otros servicios documentarán sus convenciones en iteraciones futuras.
 
-## JWT Authentication
+## Autenticación JWT
 
-The SSE Service uses **HMAC-SHA256 signed JWTs** (HS256) for authentication. The signing secret is injected as the `JWT_SECRET` environment variable.
+El SSE Service utiliza **JWTs firmados con HMAC-SHA256** (HS256) para la autenticación. El secreto de firma se inyecta como la variable de entorno `JWT_SECRET`.
 
-### Token Claims
+### Claims del Token
 
-| Claim | Standard field | Description |
+| Claim | Campo estándar | Descripción |
 |---|---|---|
-| `sub` / `userId` | `ClaimTypes.NameIdentifier` | Unique user identifier |
-| `email` | `ClaimTypes.Email` | User email address |
-| `iss` | `JWT_ISSUER` (optional) | Token issuer; validation skipped if blank |
-| `exp` | Standard | Expiry timestamp |
+| `sub` / `userId` | `ClaimTypes.NameIdentifier` | Identificador único del usuario |
+| `email` | `ClaimTypes.Email` | Dirección de email del usuario |
+| `iss` | `JWT_ISSUER` (opcional) | Emisor del token; validación omitida si está vacío |
+| `exp` | Estándar | Timestamp de expiración |
 
-### Clock Skew
+### Desfase de Reloj
 
-Services accept a configurable `JWT_CLOCK_SKEW_SECONDS` tolerance (default `30s`) to handle minor clock drift between token issuers and validators.
+Los servicios aceptan una tolerancia `JWT_CLOCK_SKEW_SECONDS` configurable (por defecto `30s`) para manejar pequeñas diferencias de reloj entre emisores y validadores de tokens.
 
-### SSE Clients
+### Clientes SSE
 
-Browser `EventSource` cannot set HTTP headers, so the JWT is passed as a `?token=` query parameter. The `JwtQueryStringMiddleware` in the SSE Service moves it into the validation context before the request is processed.
+El `EventSource` del navegador no puede establecer headers HTTP, por lo que el JWT se pasa como parámetro de query `?token=`. El `JwtQueryStringMiddleware` del SSE Service lo mueve al contexto de validación antes de procesar el request.
 
 ---
 
-## Error Response Format
+## Formato de Respuesta de Error
 
-All error responses across all services use this JSON shape:
+Todas las respuestas de error en todos los servicios usan esta estructura JSON:
 
 ```json
 {
   "code": "ERROR_CODE",
-  "message": "Human-readable description.",
+  "message": "Descripción legible por humanos.",
   "timestamp": "2026-02-26T12:00:00.000Z"
 }
 ```
 
-In C#, this is defined as:
+En C#, se define como:
 
 ```csharp
 public record ErrorResponse(string Code, string Message, DateTime Timestamp)
@@ -53,34 +53,34 @@ public record ErrorResponse(string Code, string Message, DateTime Timestamp)
 }
 ```
 
-### Common Error Codes
+### Códigos de Error Comunes
 
-| Code | HTTP Status | Meaning |
+| Código | HTTP Status | Significado |
 |---|---|---|
-| `MISSING_TOKEN` | 401 | No `token` query parameter on `/stream` |
-| `UNAUTHORIZED` | 401 | Token is invalid, expired, or malformed |
-| `MISSING_WORKSPACE_ID` | 400 | No `workspaceId` query parameter on `/stream` |
+| `MISSING_TOKEN` | 401 | Sin parámetro `token` en la query de `/stream` |
+| `UNAUTHORIZED` | 401 | Token inválido, expirado o malformado |
+| `MISSING_WORKSPACE_ID` | 400 | Sin parámetro `workspaceId` en la query de `/stream` |
 
 ---
 
-## Environment Variable Naming
+## Nomenclatura de Variables de Entorno
 
-- All environment variables are `UPPER_SNAKE_CASE`.
-- Secrets are never committed to the repository; they are injected at runtime via GCP Secret Manager or a local `.env` file.
-- Optional variables have documented defaults; required variables throw `InvalidOperationException` at startup if absent.
+- Todas las variables de entorno usan `UPPER_SNAKE_CASE`.
+- Los secretos nunca se incluyen en el repositorio; se inyectan en tiempo de ejecución mediante GCP Secret Manager o un archivo `.env` local.
+- Las variables opcionales tienen valores por defecto documentados; las requeridas lanzan `InvalidOperationException` al inicio si no están presentes.
 
-### Shared Variables
+### Variables Compartidas
 
-| Variable | Description |
+| Variable | Descripción |
 |---|---|
-| `JWT_SECRET` | HMAC-SHA256 signing secret (min 32 chars) |
-| `JWT_ISSUER` | Expected token issuer; blank = skip validation |
+| `JWT_SECRET` | Secreto de firma HMAC-SHA256 (mínimo 32 caracteres) |
+| `JWT_ISSUER` | Emisor esperado del token; vacío = omitir validación |
 
 ---
 
-## Workspace Events (Pub/Sub Message Shape)
+## Eventos de Workspace (Formato de Mensaje Pub/Sub)
 
-All messages published to the `workspace-events` Pub/Sub topic must conform to this JSON schema:
+Todos los mensajes publicados en el topic Pub/Sub `workspace-events` deben cumplir este esquema JSON:
 
 ```json
 {
@@ -91,7 +91,7 @@ All messages published to the `workspace-events` Pub/Sub topic must conform to t
 }
 ```
 
-In C#:
+En C#:
 
 ```csharp
 public record WorkspaceEvent(
@@ -101,9 +101,8 @@ public record WorkspaceEvent(
     DateTime Timestamp);
 ```
 
-### Registered Event Types
+### Tipos de Evento Registrados
 
-| Event Type | Consumer | Effect |
+| Tipo de Evento | Consumidor | Efecto |
 |---|---|---|
-| `USER_REMOVED_FROM_WORKSPACE_EVENT` | SSE Service | Terminates all SSE connections for that `userId + workspaceId` pair |
-
+| `USER_REMOVED_FROM_WORKSPACE_EVENT` | SSE Service | Termina todas las conexiones SSE para ese par `userId + workspaceId` |

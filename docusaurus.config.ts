@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'ColabBoard Docs',
-  tagline: 'Unified documentation for all ColabBoard microservices',
+  tagline: 'Documentación unificada para todos los servicios ColabBoard',
   favicon: 'img/favicon.ico',
 
   future: {
@@ -75,7 +75,7 @@ const config: Config = {
     navbar: {
       title: 'ColabBoard Docs',
       logo: {
-        alt: 'ColabBoard Logo',
+        alt: 'Logo de ColabBoard',
         src: 'img/logo.svg',
       },
       items: [
@@ -83,7 +83,7 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'mainSidebar',
           position: 'left',
-          label: 'Docs',
+          label: 'Documentación',
         },
         {
           href: 'https://github.com/ColabBoard/ColabBoard_Docs',
@@ -96,23 +96,23 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Services',
+          title: 'Servicios',
           items: [
             { label: 'SSE Service', to: '/docs/sse-service/overview' },
             { label: 'Session Service', to: '/docs/session-service/overview' },
             { label: 'Web App', to: '/docs/web-app/overview' },
-            { label: 'Infrastructure', to: '/docs/infrastructure/gcp-pubsub' },
+            { label: 'Infraestructura', to: '/docs/infrastructure/gcp-pubsub' },
           ],
         },
         {
-          title: 'More',
+          title: 'Más',
           items: [
             { label: 'GitHub', href: 'https://github.com/ColabBoard' },
-            { label: 'Contributing', to: '/docs/contributing' },
+            { label: 'Contribuir', to: '/docs/contributing' },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} ColabBoard. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} ColabBoard. Construido con Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

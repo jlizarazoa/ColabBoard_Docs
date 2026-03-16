@@ -1,16 +1,16 @@
 ---
 id: event-subscribers
-title: Event Subscribers
-sidebar_label: Event Subscribers
+title: Suscriptores de Eventos
+sidebar_label: Suscriptores de Eventos
 ---
 
-# Event Subscribers
+# Suscriptores de Eventos
 
-The SSE Service decouples event ingestion from connection management via the `IEventSubscriber` abstraction. The concrete implementation is selected at startup based on the `MESSAGING_PROVIDER` environment variable.
+El SSE Service desacopla la ingesta de eventos de la gestión de conexiones mediante la abstracción `IEventSubscriber`. La implementación concreta se selecciona al inicio según la variable de entorno `MESSAGING_PROVIDER`.
 
-## IEventSubscriber Interface
+## Interfaz IEventSubscriber
 
-**File:** `src/ColabBoard.SSE/Services/IEventSubscriber.cs`
+**Archivo:** `src/ColabBoard.SSE/Services/IEventSubscriber.cs`
 
 ```csharp
 public interface IEventSubscriber
@@ -20,16 +20,16 @@ public interface IEventSubscriber
 }
 ```
 
-The `handler` delegate is invoked for every message received from the broker. The `EventListenerService` provides this handler and routes events to `ConnectionManager`.
+El delegado `handler` se invoca por cada mensaje recibido del broker. `EventListenerService` provee este handler y enruta los eventos hacia `ConnectionManager`.
 
 ## EventListenerService
 
-**File:** `src/ColabBoard.SSE/Services/EventListenerService.cs`
+**Archivo:** `src/ColabBoard.SSE/Services/EventListenerService.cs`
 
-A .NET `BackgroundService` that:
-1. Calls `subscriber.StartAsync(HandleEvent, stoppingToken)` when the host starts.
-2. Blocks on `Task.Delay(Timeout.Infinite, stoppingToken)` until the host signals shutdown.
-3. Calls `subscriber.StopAsync()` in the `finally` block.
+Un `BackgroundService` de .NET que:
+1. Llama a `subscriber.StartAsync(HandleEvent, stoppingToken)` cuando el host arranca.
+2. Bloquea en `Task.Delay(Timeout.Infinite, stoppingToken)` hasta que el host señala el apagado.
+3. Llama a `subscriber.StopAsync()` en el bloque `finally`.
 
 ```mermaid
 sequenceDiagram
@@ -40,65 +40,65 @@ sequenceDiagram
 
     Host->>ELS: ExecuteAsync(stoppingToken)
     ELS->>Sub: StartAsync(HandleEvent, ct)
-    Sub-->>ELS: (background message loop)
-    loop For each message
+    Sub-->>ELS: (bucle de mensajes en segundo plano)
+    loop Por cada mensaje
         Sub->>ELS: HandleEvent(WorkspaceEvent)
         ELS->>CM: TerminateConnection(userId, workspaceId, reason)
     end
-    Host->>ELS: stoppingToken cancelled
+    Host->>ELS: stoppingToken cancelado
     ELS->>Sub: StopAsync()
 ```
 
-### Event Routing
+### Enrutamiento de Eventos
 
-| `EventType` | Action |
+| `EventType` | Acción |
 |---|---|
 | `USER_REMOVED_FROM_WORKSPACE_EVENT` | `ConnectionManager.TerminateConnection(userId, workspaceId, "access_revoked")` |
-| *(any other)* | `LogWarning("Unknown event type")` — ignored |
+| *(cualquier otro)* | `LogWarning("Unknown event type")` — ignorado |
 
 ---
 
-## PubSubEventSubscriber (Production)
+## PubSubEventSubscriber (Producción)
 
-**File:** `src/ColabBoard.SSE/Services/PubSubEventSubscriber.cs`
+**Archivo:** `src/ColabBoard.SSE/Services/PubSubEventSubscriber.cs`
 
-Used when `MESSAGING_PROVIDER=PubSub`. Connects to a **GCP Pub/Sub pull subscription** using the Google Cloud PubSub client library.
+Se usa cuando `MESSAGING_PROVIDER=PubSub`. Conecta a una **suscripción pull de GCP Pub/Sub** usando la librería cliente de Google Cloud PubSub.
 
-### Configuration
+### Configuración
 
-| Env Var | Required | Description |
+| Variable de entorno | Requerida | Descripción |
 |---|---|---|
-| `PUBSUB_PROJECT_ID` | **Yes** | GCP project ID |
-| `PUBSUB_SUBSCRIPTION_ID` | **Yes** | Pub/Sub subscription name |
+| `PUBSUB_PROJECT_ID` | **Sí** | ID del proyecto GCP |
+| `PUBSUB_SUBSCRIPTION_ID` | **Sí** | Nombre de la suscripción Pub/Sub |
 
-### Behaviour
+### Comportamiento
 
-- Creates a `SubscriberClient` targeting the configured subscription.
-- Message processing returns `Ack` on success and `Nack` on deserialization error or exception.
-- The stopping token is registered with `_subscriber.StopAsync()` to ensure clean shutdown.
+- Crea un `SubscriberClient` apuntando a la suscripción configurada.
+- El procesamiento de mensajes devuelve `Ack` en caso de éxito y `Nack` ante errores de deserialización o excepciones.
+- El stopping token se registra con `_subscriber.StopAsync()` para garantizar un apagado limpio.
 
-### Required GCP IAM Permissions
+### Permisos IAM Requeridos en GCP
 
-The Cloud Run service account needs:
-- `roles/pubsub.subscriber` on the subscription
+La cuenta de servicio de Cloud Run necesita:
+- `roles/pubsub.subscriber` sobre la suscripción
 
 ---
 
-## RabbitMqEventSubscriber (Local Development)
+## RabbitMqEventSubscriber (Desarrollo Local)
 
-**File:** `src/ColabBoard.SSE/Services/RabbitMqEventSubscriber.cs`
+**Archivo:** `src/ColabBoard.SSE/Services/RabbitMqEventSubscriber.cs`
 
-Used when `MESSAGING_PROVIDER=RabbitMQ`. Consumes from the `workspace-events` queue using the RabbitMQ .NET client.
+Se usa cuando `MESSAGING_PROVIDER=RabbitMQ`. Consume de la cola `workspace-events` usando el cliente .NET de RabbitMQ.
 
-### Configuration
+### Configuración
 
-| Env Var | Required | Description |
+| Variable de entorno | Requerida | Descripción |
 |---|---|---|
-| `RABBITMQ_CONNECTION_STRING` | **Yes** | e.g. `amqp://guest:guest@localhost` |
+| `RABBITMQ_CONNECTION_STRING` | **Sí** | p. ej. `amqp://guest:guest@localhost` |
 
-### Queue Declaration
+### Declaración de la Cola
 
-The subscriber declares the queue on startup (idempotent):
+El suscriptor declara la cola al iniciar (operación idempotente):
 
 ```
 Queue: workspace-events
@@ -107,32 +107,32 @@ Exclusive: false
 AutoDelete: false
 ```
 
-### Behaviour
+### Comportamiento
 
-- Uses `AsyncEventingBasicConsumer` with `autoAck: false`.
-- Sends `BasicAck` on success and `BasicNack(requeue: false)` on deserialization error.
-- Sends `BasicNack(requeue: true)` on processing exceptions.
+- Usa `AsyncEventingBasicConsumer` con `autoAck: false`.
+- Envía `BasicAck` en caso de éxito y `BasicNack(requeue: false)` ante errores de deserialización.
+- Envía `BasicNack(requeue: true)` ante excepciones de procesamiento.
 
-### Start RabbitMQ locally
+### Iniciar RabbitMQ localmente
 
 ```bash
 docker run -d -p 5672:5672 -p 15672:15672 rabbitmq:3-management
-# Management UI: http://localhost:15672 (guest/guest)
+# UI de gestión: http://localhost:15672 (guest/guest)
 ```
 
 ---
 
-## NullEventSubscriber (Default)
+## NullEventSubscriber (Por Defecto)
 
-**File:** `src/ColabBoard.SSE/Services/NullEventSubscriber.cs`
+**Archivo:** `src/ColabBoard.SSE/Services/NullEventSubscriber.cs`
 
-Used when `MESSAGING_PROVIDER=None` (default). Does nothing — `StartAsync` and `StopAsync` are no-ops. Useful for running the service without any message broker dependency.
+Se usa cuando `MESSAGING_PROVIDER=None` (valor por defecto). No hace nada — `StartAsync` y `StopAsync` son no-ops. Útil para ejecutar el servicio sin ninguna dependencia de broker de mensajes.
 
 ---
 
-## Selecting the Provider
+## Selección del Provider
 
-The DI registration in `Program.cs`:
+El registro en DI dentro de `Program.cs`:
 
 ```csharp
 var messagingProvider = builder.Configuration.GetValue("MESSAGING_PROVIDER", "None");
@@ -145,8 +145,8 @@ else
     builder.Services.AddSingleton<IEventSubscriber, NullEventSubscriber>();
 ```
 
-| `MESSAGING_PROVIDER` | Subscriber | Use case |
+| `MESSAGING_PROVIDER` | Suscriptor | Caso de uso |
 |---|---|---|
-| `None` (default) | `NullEventSubscriber` | Unit tests, demo runs |
-| `RabbitMQ` | `RabbitMqEventSubscriber` | Local integration testing |
-| `PubSub` | `PubSubEventSubscriber` | Production (GCP Cloud Run) |
+| `None` (por defecto) | `NullEventSubscriber` | Tests unitarios, demos |
+| `RabbitMQ` | `RabbitMqEventSubscriber` | Tests de integración locales |
+| `PubSub` | `PubSubEventSubscriber` | Producción (GCP Cloud Run) |
